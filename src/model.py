@@ -8,7 +8,7 @@ import copy
 
 from fairseq.modules import LightweightConv1dTBC
 
-from utilities import utils
+from src import utils
 
 
 class SentenceEmbeddingModel(nn.Module):
@@ -40,6 +40,7 @@ class SentenceEmbeddingModel(nn.Module):
             self.embeddings = nn.Embedding(
                 self.n_vocabs, self.embed_dim, padding_idx=self.padding_idx)
         elif args.ELMo:
+            # print("DEBUG 1")
             self.elmo_embedding = utils.get_ELMo_layer(
                 args.ELMo_Size).to(self.device)
         else:
@@ -134,7 +135,7 @@ class PretrainedEmbeddings():
         if word not found in pretrained list, initialize randomly.
         """
         model = gensim.models.KeyedVectors.load_word2vec_format(
-            self.pre_embedding_path, binary=True)
+            self.pre_embedding_path, binary=True, unicode_errors='ignore')
         for word in self.vocabs:
             try:
                 self.weights_matrix[self.word2idx[word]] = model[word]

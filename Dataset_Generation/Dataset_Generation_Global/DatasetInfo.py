@@ -84,11 +84,11 @@ if __name__ =='__main__':
 #    filepath_text_perm = './training_perm/wsj_0118.pos.text_3_5745'
 #    filepath_egrid_perm = './training_perm_egrid/wsj_0118.pos.text.parsed.ner.EGrid_3_5745'
 
-    filepath_text = './training/'
-    filepath_egrid = './training_egrid/'
+    filepath_text = '/home/dheeraj/Desktop/Mettl/Coherence and correlation/implementation/unified-coherence-model/processed_dataset/training/'
+    filepath_egrid = '/home/dheeraj/Desktop/Mettl/Coherence and correlation/implementation/unified-coherence-model/processed_dataset/training_egrid/'
 
-    filepath_text_perm = './training_perm/'
-    filepath_egrid_perm = './training_perm_egrid/'
+    filepath_text_perm = '/home/dheeraj/Desktop/Mettl/Coherence and correlation/implementation/unified-coherence-model/processed_dataset/training_perm/'
+    filepath_egrid_perm = '/home/dheeraj/Desktop/Mettl/Coherence and correlation/implementation/unified-coherence-model/processed_dataset/training_perm_egrid/'
 
     Dataset_Info(filepath_text, 'text', False)
     Dataset_Info(filepath_egrid, 'egrid', False)
@@ -100,11 +100,11 @@ if __name__ =='__main__':
     print("-------------------------------------------")
     print("-------------------------------------------")
 
-    filepath_text = './test/'
-    filepath_egrid = './test_egrid/'
+    filepath_text = '/home/dheeraj/Desktop/Mettl/Coherence and correlation/implementation/unified-coherence-model/processed_dataset/test/'
+    filepath_egrid = '/home/dheeraj/Desktop/Mettl/Coherence and correlation/implementation/unified-coherence-model/processed_dataset/test_egrid/'
 
-    filepath_text_perm = './test_perm/'
-    filepath_egrid_perm = './test_perm_egrid/'
+    filepath_text_perm = '/home/dheeraj/Desktop/Mettl/Coherence and correlation/implementation/unified-coherence-model/processed_dataset/test_perm/'
+    filepath_egrid_perm = '/home/dheeraj/Desktop/Mettl/Coherence and correlation/implementation/unified-coherence-model/processed_dataset/test_perm_egrid/'
 
     Dataset_Info(filepath_text, 'text', False)
     Dataset_Info(filepath_egrid, 'egrid', False)

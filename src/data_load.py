@@ -85,22 +85,24 @@ class BatchGeneratorGlobal():
         for i in range(20):
             for fname in items:
                 fname = fname + "_" + str(i+1)
-                loadpath = os.path.join(self.path, fname)
-                batch_file = load_file(loadpath, self.file_type)
-                # if pos and neg are same file i.e. perm is same, skip it
-                if batch_file[0] == batch_file[1]:
-                    continue
-                for z in range(len(batch_file)):  # z=0 -> pos_doc; z=1 -> neg_doc
-                    batch_file[z] = [sentence.split()
-                                     for sentence in batch_file[z]]
-                batch.append(batch_file)
-                batch_length.append(len(batch_file[0]))
-                batch_fname.append(fname)
-                if len(batch) == self.batch_size:
-                    yield batch, batch_length, batch_fname
-                    batch = []  # make it batch empty for the next iteration
-                    batch_fname = []
-                    batch_length = []
+                if os.path.exists(os.path.join(self.path, fname)):
+                    print(fname)
+                    loadpath = os.path.join(self.path, fname)
+                    batch_file = load_file(loadpath, self.file_type)
+                    # if pos and neg are same file i.e. perm is same, skip it
+                    if batch_file[0] == batch_file[1]:
+                        continue
+                    for z in range(len(batch_file)):  # z=0 -> pos_doc; z=1 -> neg_doc
+                        batch_file[z] = [sentence.split()
+                                         for sentence in batch_file[z]]
+                    batch.append(batch_file)
+                    batch_length.append(len(batch_file[0]))
+                    batch_fname.append(fname)
+                    if len(batch) == self.batch_size:
+                        yield batch, batch_length, batch_fname
+                        batch = []  # make it batch empty for the next iteration
+                        batch_fname = []
+                        batch_length = []
 
 
 def create_batch_generators(args):

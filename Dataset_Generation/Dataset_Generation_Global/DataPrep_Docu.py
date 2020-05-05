@@ -72,7 +72,7 @@ def NormalizeString(s):
 #    s = re.sub(r"([\d]+s)", r"", s) # remove words like '1950s'
 #    s = re.sub(r"([.!?])", r" ", s) 
     s = re.sub(r"[^a-zA-Z.!?@]+", r" ", s)
-    s = "<s>"+s+"</s>"
+    s = "<bos> "+s+" <eos>"
 
 #    s = re.sub(r"[^a-zA-Z]+", r" ", s)
 #    s = re.sub(r"\d+", r"", s)
@@ -205,10 +205,10 @@ def Parse_Args():
 
     # Dataset parameter
     parser.add_argument('--n_window', type=int, default=0, help='Number of permutation window')
-    parser.add_argument('--train_pos', type=str, default="./training/", help='Pos Train file dir path')
-    parser.add_argument('--train_neg', type=str, default="./training_perm/", help='Neg Train file dir path')
-    parser.add_argument('--test_pos', type=str, default="./test/", help='Pos Test file dir path')
-    parser.add_argument('--test_neg', type=str, default="./test_perm/", help='Pos Test file dir path')
+    parser.add_argument('--train_pos', type=str, default="/home/dheeraj/Desktop/Mettl/Coherence and correlation/implementation/unified-coherence-model/Dataset_Generation/Dataset_Generation_Global/training/", help='Pos Train file dir path')
+    parser.add_argument('--train_neg', type=str, default="/home/dheeraj/Desktop/Mettl/Coherence and correlation/implementation/unified-coherence-model/Dataset_Generation/Dataset_Generation_Global/training_perm/", help='Neg Train file dir path')
+    parser.add_argument('--test_pos', type=str, default="/home/dheeraj/Desktop/Mettl/Coherence and correlation/implementation/unified-coherence-model/Dataset_Generation/Dataset_Generation_Global/test", help='Pos Test file dir path')
+    parser.add_argument('--test_neg', type=str, default="/home/dheeraj/Desktop/Mettl/Coherence and correlation/implementation/unified-coherence-model/Dataset_Generation/Dataset_Generation_Global/test_perm/", help='Pos Test file dir path')
 
     parser.add_argument('--train_save_path', type=str, default="./Dataset/train/", help='Save train paired Data')
     parser.add_argument('--test_save_path', type=str, default="./Dataset/test/", help='Save test paired Data')
@@ -238,10 +238,11 @@ if __name__ =="__main__":
         pos_file_names = Paired_Files.Load_Pos_Names()
         Pos_Generator = Data_Load.Doc_Generator(args.train_pos, pos_file_names)
 
+        # TODO: NEED Changes 1. remove <para_break> 2. add space in <s> and word.
         word_count = Word_Counter(args.train_pos)
+        # TODO: Add <bos> and <eos> <s> and </s>
         Vocab = Build_Vocab(word_count, ratio=1.0)
         word2idx, idx2word = Word_Dictionary(Vocab)
-
         savepath = Data_Load.Create_Path(args.vocab_save_path, 'Vocab')
         Data_Load.Save_File(savepath, Vocab, types='json')
 

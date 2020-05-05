@@ -18,17 +18,17 @@ def argument_parser():
     parser.add_argument('--n_window', type=int, default=3,
                         help='Number of permutation window. Only for local. vlaues: 1/2/3')
     parser.add_argument('--train_path', type=str,
-                        default="/data/Coherence/Dataset_Global/train/", help='Train paired Data')  # "../data-global/train/"
+                        default="processed_dataset/Dataset/window_1/train/", help='Train paired Data')  # "../data-global/train/"
     parser.add_argument('--test_path', type=str,
-                        default="/data/Coherence/Dataset_Global/dev/", help='test/Dev paired Data')
-    parser.add_argument('--file_list_train', type=str, default="/data/Coherence/Dataset_Global/wsj.train",
+                        default="processed_dataset/Dataset/window_1/test/", help='test/Dev paired Data')
+    parser.add_argument('--file_list_train', type=str, default="processed_dataset/Dataset/window_1/wsj.train",
                         help='Only for Global Dataset: Train Data list')
-    parser.add_argument('--file_list_test', type=str, default="/data/Coherence/Dataset_Global/wsj.dev",
+    parser.add_argument('--file_list_test', type=str, default="processed_dataset/Dataset/window_1/wsj.test",
                         help='Only for Global Dataset: test/Dev Data list')
     parser.add_argument('--pre_embedding_path', type=str,
-                        default="/data/tasnim/pretrained_embeddings/GoogleNews-vectors-negative300.bin", help='Pretrained word embedding path')
+                        default="processed_dataset/pretrained_embedding/GoogleNews-vectors-negative300-SLIM.bin", help='Pretrained word embedding path')
     parser.add_argument('--vocab_path', type=str,
-                        default="/data/Coherence/Vocab", help='Vocab path')
+                        default="processed_dataset/Dataset/vocab/Vocab", help='Vocab path')
     parser.add_argument('--padding_symbol', type=str,
                         default="<pad>", help='Vocab path')
     # Training Parameter-------------------------------------------------------------

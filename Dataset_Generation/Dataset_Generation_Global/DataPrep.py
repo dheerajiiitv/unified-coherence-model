@@ -221,22 +221,22 @@ def Parse_Args():
 
     # Dataset parameter
     parser.add_argument('--n_window', type=int, default=3, help='Number of permutation window')
-    parser.add_argument('--train_pos', type=str, default="/home/han/Desktop/text_dataset/training/", help='Pos Train file dir path')
-    parser.add_argument('--train_neg', type=str, default="/home/han/Desktop/text_dataset/training_perm/", help='Neg Train file dir path')
-    parser.add_argument('--test_pos', type=str, default="/home/han/Desktop/text_dataset/test/", help='Pos Test file dir path')
-    parser.add_argument('--test_neg', type=str, default="/home/han/Desktop/text_dataset/test_perm/", help='Neg Test file dir path')
-    parser.add_argument('--pre_embedding_path', type=str, default="./Pretrained_Embedding/GoogleNews-vectors-negative300.bin", help='Pretrained word embedding path')
+    parser.add_argument('--train_pos', type=str, default="/home/dheeraj/Desktop/Mettl/Coherence and correlation/implementation/unified-coherence-model/processed_dataset/training_egrid/", help='Pos Train file dir path')
+    parser.add_argument('--train_neg', type=str, default="/home/dheeraj/Desktop/Mettl/Coherence and correlation/implementation/unified-coherence-model/processed_dataset/training_perm_egrid/", help='Neg Train file dir path')
+    parser.add_argument('--test_pos', type=str, default="/home/dheeraj/Desktop/Mettl/Coherence and correlation/implementation/unified-coherence-model/processed_dataset/test_egrid/", help='Pos Test file dir path')
+    parser.add_argument('--test_neg', type=str, default="/home/dheeraj/Desktop/Mettl/Coherence and correlation/implementation/unified-coherence-model/processed_dataset/test_perm_egrid/", help='Neg Test file dir path')
+    parser.add_argument('--pre_embedding_path', type=str, default="/home/dheeraj/Desktop/Mettl/Kaustuv Work/InferSent/crawl-300d-2M-subword/crawl-300d-2M-subword.bin", help='Pretrained word embedding path')
 
-    parser.add_argument('--train_save_path', type=str, default="/home/han/Desktop/Dataset/train/", help='Save train paired Data')
-    parser.add_argument('--test_save_path', type=str, default="/home/han/Desktop/Dataset/test/", help='Save test paired Data')
-    parser.add_argument('--vocab_save_path', type=str, default="/home/han/Desktop/Dataset/vocab/", help='Save paired Data')
+    parser.add_argument('--train_save_path', type=str, default="/home/dheeraj/Desktop/Dataset/train_egrid/", help='Save train paired Data')
+    parser.add_argument('--test_save_path', type=str, default="/home/dheeraj/Desktop/Dataset/test_egrid/", help='Save test paired Data')
+    parser.add_argument('--vocab_save_path', type=str, default="/home/dheeraj/Desktop/Dataset/vocab_egrid/", help='Save paired Data')
 
     return parser.parse_args()
 
 if __name__ =="__main__":
     logger = logging.getLogger('PyTorch Network')
 
-    f_handler = logging.FileHandler('/home/han/PyTorch.log')
+    f_handler = logging.FileHandler('/home/dheeraj/PyTorch.log')
     f_handler.setLevel(logging.ERROR)
 
     f_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -247,7 +247,7 @@ if __name__ =="__main__":
     Print_Args(args)
 
     # Train Files
-    Paired_Files = Data_Load.Pos_Neg_Pairing(args.train_pos, args.train_neg, window=args.n_window, text=True)
+    Paired_Files = Data_Load.Pos_Neg_Pairing(args.train_pos, args.train_neg, window=args.n_window, text=False)
     pos_file_names = Paired_Files.Load_Pos_Names()
     Pos_Generator = Data_Load.Doc_Generator(args.train_pos, pos_file_names)
 
@@ -283,7 +283,7 @@ if __name__ =="__main__":
 
 
     # Test Files
-    Paired_Files = Data_Load.Pos_Neg_Pairing(args.test_pos, args.test_neg, window=args.n_window, text=True)
+    Paired_Files = Data_Load.Pos_Neg_Pairing(args.test_pos, args.test_neg, window=args.n_window, text=False)
     pos_file_names = Paired_Files.Load_Pos_Names()
     Pos_Generator = Data_Load.Doc_Generator(args.test_pos, pos_file_names)
 

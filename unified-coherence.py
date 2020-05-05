@@ -26,6 +26,11 @@ args = parser.parse_args()
 random.seed(0)
 torch.manual_seed(6)
 
+args.ELMo_Size = "small"
+args.experiment_path = "model/"
+args.vocab_path = "processed_dataset/Dataset/vocab/Vocab"
+args.device = "cpu"
+args.save_model = True
 now = datetime.datetime.now()
 args.experiment_folder = args.experiment_path + \
     f"{now.year}_{now.month}_{now.day}_{now.hour}_{now.minute}/"
@@ -141,8 +146,8 @@ def calculate_scores(batch, test=False):
                     pos_batch, neg_batch, batch_docs_len, device=args.device)
             hidden_out = torch.zeros_like(hidden)
             for i in range(args.batch_size_train):
-                hidden_out[i, :, :] = torch.index_select(
-                    hidden[i, :, :], dim=0, index=neg_doc_order[i])
+                # print("DEBUG", i, neg_doc_order)
+                hidden_out[i, :, :] = torch.index_select(hidden[i, :, :], dim=0, index=neg_doc_order[i])
 
         ### Global Feature ###
         # make the time dim to first, batch to second - for lightweight conv.  [doc_max_len -> batch_size -> 2*args.hidden_dim]
@@ -218,12 +223,20 @@ def calculate_scores(batch, test=False):
 
 
 Best_Result = 0
-for epoch in range(args.Epoch):
+for epoch in range(2):
     start_train = time.perf_counter()  # Measure one epoch training time
     scheduler.step()
     scheduler_lm.step()
     local_global_model.train()
     lm_loss_model.train()
+
+    from torchsummary import summary
+
+    print("Summary Local Global Model")
+    print(local_global_model)
+    print("Summary Language Model")
+    print(lm_loss_model )
+
 
     n_data_train = 0  # n_data_train is the number of accumulated train documents
     n_TP_train = 0

@@ -1,4 +1,4 @@
 #!/bin/bash
 
-python3 DatasetPermutation.py
-python3 DataPrep_Docu.py
+python3.6 DatasetPermutation.py
+python3.6 DataPrep_Docu.py

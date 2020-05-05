@@ -40,13 +40,13 @@ def Load_Document(load_path):
         Document = pickle.load(fp)
     return Document
 
-def Read_Document_List(path, n_sent, file_type):
+def Read_Document_List(path, n_sent, file_type, selected_files):
     """
     1) Read_File_Path
     2) Read_Document
     3) Return training and test documents
     """
-    File_Path = Read_File_Path(path, n_sent=n_sent, file_type=file_type)
+    File_Path = Read_File_Path(path, n_sent=n_sent, file_type=file_type, selected_files=selected_files)
 
     training_document = {}
     test_document = {}
@@ -59,6 +59,7 @@ def Read_Document_List(path, n_sent, file_type):
             file_name = file_path.split('/')[-1]
             section = int(file_name.split('.')[0][4:6])
 
+        # print("Section", section)
         if section <=13:
             training_document[file_name]= Read_Document(file_path, file_type)
         else:
@@ -94,16 +95,16 @@ def Count_Lines(lines, n_sent, file_type, Text_Path):
         print('File type error')
 
     
-def Read_File_Path(path, n_sent, file_type):
+def Read_File_Path(path, n_sent, file_type, selected_files):
     """
     file_type: 1) 'text' 2) 'egrid'
 
     Return text file path
     ex) ./raw/wsj/08/wsj_xxxx.pos.text
     """
-
+ 
     dir_paths = os.walk(path) # Return Generator
-
+    #print("DIR PATH", list(dir_paths), path)
     if file_type == 'text':
         pattern = r"^wsj+_\d+\.pos\.text$"
         regex = re.compile(pattern)
@@ -114,7 +115,7 @@ def Read_File_Path(path, n_sent, file_type):
         for dir_path in dir_paths:
             root_dir = dir_path[0]
             file_path_list = dir_path[2]
-
+            #print("root_dir", root_dir, "file_path_list", file_path_list)
             # Read only text files
             for file_path in file_path_list:
                 if regex.match(file_path) is not None:
@@ -124,13 +125,13 @@ def Read_File_Path(path, n_sent, file_type):
                         Exceed = Count_Lines(lines, n_sent, file_type, Text_Path)
                         if Exceed==True:
                             Text_Path_List.append(Text_Path)
-
+        #print(Text_Path_List)	
         return Text_Path_List
 
     elif file_type =='egrid':
         pattern = r"^wsj+_+\d+\.+pos+\.+text+\.+parsed+\.+ner+\.+EGrid$"
         regex = re.compile(pattern)
-
+        selected_files = [i.split('/')[-1] for i in selected_files]
         # Enter subfolders. ex) 01, 02, 03....
         Text_Path_List = []
         for dir_path in dir_paths:
@@ -143,8 +144,10 @@ def Read_File_Path(path, n_sent, file_type):
                     Text_Path = os.path.join(root_dir, file_path)
                     with open(Text_Path, 'r') as f:
                         lines = f.readline().strip()
-                        Exceed = Count_Lines(lines, n_sent, file_type, Text_Path)
-                        if Exceed==True:
+                        # Exceed = Count_Lines(lines, n_sent, file_type, Text_Path)
+                        # if Exceed==True:
+                        # print(file_path[:17])
+                        if file_path[:17] in selected_files:
                             Text_Path_List.append(Text_Path)
         return Text_Path_List
     else:
@@ -178,10 +181,16 @@ class Dataset_Processing():
         n_window: list of the number of windows
         dataset_type: 'train' or 'test'
         """
-        training_document, test_document, File_Path_Text = Read_Document_List(read_path, n_sent=self.n_sent, file_type = 'text')
-        training_document_egrid, test_document_egrid, File_Path_EGrid = Read_Document_List(read_path, n_sent=self.n_sent, file_type = 'egrid')
+        training_document, test_document, File_Path_Text = Read_Document_List("./raw/wsj", n_sent=self.n_sent, file_type = 'text', selected_files=None)
+        training_document_egrid, test_document_egrid, File_Path_EGrid = Read_Document_List("./raw/egrid", n_sent=self.n_sent, file_type = 'egrid', selected_files=File_Path_Text)
+
+        print("Read Document completed!", len(training_document), len(test_document), len(training_document_egrid), len(test_document_egrid))
+
+        # exit()
 
         self.Creating_Dataset(training_document, training_document_egrid, dataset_type='train')
+        
+        print("Creating Training Document done...")
         self.Creating_Dataset(test_document, test_document_egrid, dataset_type='test')
     
     def Creating_Dataset(self, Documents, Documents_Egrid, dataset_type):
@@ -218,7 +227,7 @@ class Dataset_Processing():
 
 
         for file_name, text in Documents.items():
-            print(f"Processing {file_name}") 
+            
             
             Document = text
             text_name = file_name # Text file
@@ -226,54 +235,64 @@ class Dataset_Processing():
             egrid_file = file_name + '.parsed.ner.EGrid'
             EGrid = Documents_Egrid[egrid_file]
 
+
+            # Check if number of sentence in both are same.
+
+            print(len(Document) , len(np.asarray(EGrid[0].split(" ")) ))
+
+            if len(Document) == len(np.asarray(EGrid[0].split(" "))) - 1:
+                print(f"Processing {file_name}") 
             # Save positive text file
-            save_path = os.path.join(pos_dir, text_name) # Define save path
-            Save_Document(save_path, Document, doc_type='text') # save positive documents
+                save_path = os.path.join(pos_dir, text_name) # Define save path
+                Save_Document(save_path, Document, doc_type='text') # save positive documents
 
-            # Save positive grid file
-            save_path = os.path.join(pos_dir_egrid, egrid_file) # Define save path
-            Save_Document(save_path, EGrid, doc_type='egrid') # save positive egrid
+                # Save positive grid file
+                save_path = os.path.join(pos_dir_egrid, egrid_file) # Define save path
+                Save_Document(save_path, EGrid, doc_type='egrid') # save positive egrid
 
-            for n, p in zip(self.n_window, self.perm):
-                # window_idx is the all possible window indices
-                n_permutation = p
-                window_idx  = Sentence_Window(Document, n, self.window_size, perm=p, overlap=False) 
-                window_idx_len = len(window_idx)
 
-                if window_idx_len>=20:
-                    window_idx  = [window_idx[i] for i in range(n_permutation)]
+                for n, p in zip(self.n_window, self.perm):
+                    # window_idx is the all possible window indices
+                    n_permutation = p
+                    window_idx  = Sentence_Window(Document, n, self.window_size, perm=p, overlap=False) 
                     window_idx_len = len(window_idx)
 
+                    if window_idx_len>=20:
+                        window_idx  = [window_idx[i] for i in range(n_permutation)]
+                        window_idx_len = len(window_idx)
 
-                last_perm = []
 
-                check_n_window = 0
-                for window in window_idx:
-                    perm_idx = []
-                    for idx_list in window:
-                        perm_list = list(itertools.permutations(idx_list))[1:] # Exclude the same thing
-                        comb_selection = np.random.choice(range(len(perm_list)), 1, replace=False) # Randomly selects some combination indices
-                        perm_element = list(perm_list[comb_selection[0]])
-                        perm_idx.append(perm_element)
+                    last_perm = []
+                    check_n_window = 0
+                    for window in window_idx:
+                        perm_idx = []
+                        for idx_list in window:
+                            perm_list = list(itertools.permutations(idx_list))[1:] # Exclude the same thing
+                            comb_selection = np.random.choice(range(len(perm_list)), 1, replace=False) # Randomly selects some combination indices
+                            perm_element = list(perm_list[comb_selection[0]])
+                            perm_idx.append(perm_element)
 
-                    #perm_idx = [list(np.random.permutation(idx_list)) for idx_list in window]
+                        #perm_idx = [list(np.random.permutation(idx_list)) for idx_list in window]
+                        
+                        check_n_window +=1
+                        i = check_n_window
 
-                    check_n_window +=1
-                    i = check_n_window
+                        Permuted_Document, permuted_idx_text = Permutation(Document, window, perm_idx, file_type='text')
+                        
+                        Permuted_EGrid, permuted_idx_egrid = Permutation(EGrid, window, perm_idx, file_type='egrid')
 
-                    Permuted_Document, permuted_idx_text = Permutation(Document, window, perm_idx, file_type='text')
-                    
-                    Permuted_EGrid, permuted_idx_egrid = Permutation(EGrid, window, perm_idx, file_type='egrid')
+                        save_name = text_name + '_' + str(n) + '_' + str(i)
+                        save_path = os.path.join(neg_dir, save_name)
+                        if len(Permuted_Document)!=len(Document):
+                            print(f"Errorneous File: {save_name}") 
+                        Save_Document(save_path, Permuted_Document, doc_type='text') # save negative documents
 
-                    save_name = text_name + '_' + str(n) + '_' + str(i)
-                    save_path = os.path.join(neg_dir, save_name)
-                    if len(Permuted_Document)!=len(Document):
-                        print(f"Errorneous File: {save_name}") 
-                    Save_Document(save_path, Permuted_Document, doc_type='text') # save negative documents
+                        save_name_egrid = egrid_file + '_' + str(n) + '_' + str(i)
+                        save_path = os.path.join(neg_dir_egrid, save_name_egrid)
+                        Save_Document(save_path, Permuted_EGrid, doc_type='egrid') # save negative documents
 
-                    save_name_egrid = egrid_file + '_' + str(n) + '_' + str(i)
-                    save_path = os.path.join(neg_dir_egrid, save_name_egrid)
-                    Save_Document(save_path, Permuted_EGrid, doc_type='egrid') # save negative documents
+            else:
+                print(f"NOT Processing {file_name}") 
 
 
 
@@ -320,8 +339,8 @@ def Permutation(Document, window, permuted_idx, file_type):
             doc, permuted = zipped
             permuted = np.asarray(permuted.split(" "))
             doc = np.asarray(doc.split(" ")) 
-
             permuted[window_flat] = doc[permuted_idx_flat]
+            
 #            for i, perm_idx in enumerate(permuted_idx_flat):
 #                permuted[window_flat[i]] = doc[perm_idx]
             permuted = " ".join(list(permuted))
@@ -345,13 +364,14 @@ def Sentence_Window(Document, n_window, window_size, perm, overlap=False):
 
     docu_length = len(Document)
     
-
     assert n_window <= docu_length/window_size, "The number of windows should be smaller"
 
     window_start = Get_Window_Starting_Points(docu_length, window_size)
 
 
     if overlap == False:
+
+        # 1, 3, [0,111,3], 20
         window_idx = Window_Idx(n_window, window_size, window_start, perm) # Return sentence indices within a window
         return window_idx
     else:
@@ -411,16 +431,19 @@ def Window_Idx(n_window, window_size, window_start, perm):
         Some integer
         window_idx: full indices of windows
         """
+
         window_idx = []
 
         window_comb = [w_s for w_s in itertools.combinations(window_start, n_window)] # Generate all possible combinations
         window_comb = Select_N_comb(window_comb, perm)
         
+
         for comb in window_comb:
             window_temp = []
             for idx in comb:
                 window_temp.append([i for i in range(idx, idx+window_size)])
             window_idx.append(window_temp)
+
         return window_idx
 
     else:
@@ -432,7 +455,6 @@ def Select_N_comb(window_comb, N):
     window_comb: all possible choices of window list
     N: criteria
     """
-
     n_selected_windows = len(window_comb)
 
     if n_selected_windows<N:
@@ -450,7 +472,7 @@ def Select_N_comb(window_comb, N):
     else:
         print("Errors in selecting n_comb")
 
-def Read_Files(path, text=True):
+def Read_Files(path, text=False):
     """
     Search files in a folder within the path
     """
@@ -472,6 +494,7 @@ def Read_Files(path, text=True):
                 if regex.match(file_name) is not None:
                     File_List.append(file_name)
 
+
         return File_List
     else:
         pattern = r"^wsj+_\d+\.pos\.text.+$"
@@ -481,12 +504,12 @@ def Read_Files(path, text=True):
         # Enter subfolders. ex) 01, 02, 03....
         File_List = []
         for dir_path in dir_paths:
+
             root_dir = dir_path[0]
             file_path_list = dir_path[2]
-
             # Read only text files
             for file_name in file_path_list:
-                if regex.match(file_name) is not None:
+                #if regex.match(file_name) is not None:
                     File_List.append(file_name)
 
         return File_List
@@ -513,7 +536,7 @@ if __name__ =='__main__':
 
 
     #read_path = './test/test/'
-    read_path = './raw-wsj/wsj'
+    read_path = '/home/dheeraj'
     n_window = [1, 2, 3]
     perm = [20, 20, 20] # max # of perm
 
