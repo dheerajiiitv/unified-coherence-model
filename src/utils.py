@@ -23,13 +23,20 @@ def argument_parser():
     parser.add_argument('--train_label', type=str,
                         default="processed_dataset/Dataset_GCDC/window_1/labels.train", help='Train paired Data')
 
-    parser.add_argument('--test_label', type=str,
-                        default="processed_dataset/Dataset_GCDC/window_1/labels.test", help='Train paired Data')
-    parser.add_argument('--test_path', type=str,
-                        default="processed_dataset/Dataset_GCDC/window_1/test/", help='test/Dev paired Data')
+    parser.add_argument('--test_label_clinton', type=str,
+                        default="processed_dataset/Dataset_GCDC/window_1/labels_clinton.test", help='Train paired Data')
+    parser.add_argument('--test_path_clinton', type=str,
+                        default="processed_dataset/Dataset_GCDC/window_1/test_clinton/", help='test/Dev paired Data')
+    parser.add_argument('--test_label_enron', type=str,
+                        default="processed_dataset/Dataset_GCDC/window_1/labels_enron.test", help='Train paired Data')
+    parser.add_argument('--test_path_enron', type=str,
+                        default="processed_dataset/Dataset_GCDC/window_1/test_enron/", help='test/Dev paired Data')
+ 
     parser.add_argument('--file_list_train', type=str, default="processed_dataset/Dataset_GCDC/window_1/enron.train",
                         help='Only for Global Dataset: Train Data list')
-    parser.add_argument('--file_list_test', type=str, default="processed_dataset/Dataset_GCDC/window_1/enron.test",
+    parser.add_argument('--file_list_test_enron', type=str, default="processed_dataset/Dataset_GCDC/window_1/enron.test",
+                        help='Only for Global Dataset: test/Dev Data list')
+    parser.add_argument('--file_list_test_clinton', type=str, default="processed_dataset/Dataset_GCDC/window_1/clinton.test",
                         help='Only for Global Dataset: test/Dev Data list')
     parser.add_argument('--pre_embedding_path', type=str,
                         default="processed_dataset/pretrained_embedding/GoogleNews-vectors-negative300-SLIM.bin", help='Pretrained word embedding path')

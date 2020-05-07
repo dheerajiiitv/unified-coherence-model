@@ -1,0 +1,94 @@
+**ELMo word Embeddings!
+---------------------------------------------------------
+---------------------------------------------------------
+||Experiment Date:2020-5-14||
+Arguments List: 
+
+- experiment_path: model/
+- save_model: True
+- n_window: 3
+- train_path: processed_dataset/Dataset_GCDC/window_1/train/
+- train_label: processed_dataset/Dataset_GCDC/window_1/labels.train
+- test_label: processed_dataset/Dataset_GCDC/window_1/labels.test
+- test_path: processed_dataset/Dataset_GCDC/window_1/test/
+- file_list_train: processed_dataset/Dataset_GCDC/window_1/enron.train
+- file_list_test: processed_dataset/Dataset_GCDC/window_1/enron.test
+- pre_embedding_path: processed_dataset/pretrained_embedding/GoogleNews-vectors-negative300-SLIM.bin
+- vocab_path: processed_dataset/Dataset_GCDC/vocab/Vocab
+- padding_symbol: <pad>
+- Epoch: 25
+- learning_rate_step: 2
+- learning_rate_decay: 0.1
+- weight_decay: 1e-05
+- learning_rate: 0.0001
+- ranking_loss_margin: 5
+- device: cuda
+- batch_size_train: 4
+- batch_size_test: 4
+- shuffle: True
+- file_type: json
+- window_size: 3
+- n_vocabs: None
+- embed_dim: 256
+- hidden_dim: 256
+- num_layers: 1
+- dropout: 0
+- bidirectional: True
+- batch_first: True
+- num_head: 16
+- kernel_size: 5
+- conv_dropout: 0.0
+- kernel_padding: 3
+- kernel_softmax: True
+- GoogleEmbedding: False
+- RandomEmbedding: False
+- ELMo: True
+- ELMo_Size: small
+- bilinear_dim: 32
+- lm_loss_weight: 1.0
+- dataset: data-global
+- eval_task: std
+- global_model: True
+- experiment_folder: model/2020_5_14_15_46/
+---------------------------------------------------------
+---------------------------------------------------------
+
+Reading Global Discrimination Dataset
+Time: 15:47:00.643364 || Epoch: 0 || N_Mini_Batch: 49 || Mini_Batch_Acc: 0.5|| LM loss: 18.007354736328125|| Total Loss: 19.063858032226562
+Time: 15:47:28.450599 || Epoch: 0 || N_Mini_Batch: 99 || Mini_Batch_Acc: 0.75|| LM loss: 16.50127601623535|| Total Loss: 17.275798797607422
+Time: 15:47:57.687617 || Epoch: 0 || N_Mini_Batch: 149 || Mini_Batch_Acc: 0.5|| LM loss: 14.30082893371582|| Total Loss: 15.347152709960938
+Time: 15:48:25.510820 || Epoch: 0 || N_Mini_Batch: 199 || Mini_Batch_Acc: 0.75|| LM loss: 12.19303035736084|| Total Loss: 12.726567268371582
+Time: 15:48:52.579412 || Epoch: 0 || N_Mini_Batch: 249 || Mini_Batch_Acc: 0.25|| LM loss: 8.645051002502441|| Total Loss: 12.948630332946777
+**Training Epoch: 0|| Train accuracy result: 0.477|| Elapsed Time: 140.25752913900033
+Dev set evaluation start...
+***Saving Best Model*****
+Dev accuracy result: 0.515|| Best result so far: 0.515||
+Time: 15:49:46.469069 || Epoch: 1 || N_Mini_Batch: 49 || Mini_Batch_Acc: 0.5|| LM loss: 8.705133438110352|| Total Loss: 9.745746612548828
+Time: 15:50:14.310026 || Epoch: 1 || N_Mini_Batch: 99 || Mini_Batch_Acc: 1.0|| LM loss: 8.279364585876465|| Total Loss: 8.673418998718262
+Time: 15:50:43.637941 || Epoch: 1 || N_Mini_Batch: 149 || Mini_Batch_Acc: 0.75|| LM loss: 8.021574020385742|| Total Loss: 8.75179672241211
+Time: 15:51:11.483398 || Epoch: 1 || N_Mini_Batch: 199 || Mini_Batch_Acc: 0.75|| LM loss: 8.399385452270508|| Total Loss: 8.818345069885254
+Time: 15:51:38.527641 || Epoch: 1 || N_Mini_Batch: 249 || Mini_Batch_Acc: 0.25|| LM loss: 7.480324745178223|| Total Loss: 8.613500595092773
+**Training Epoch: 1|| Train accuracy result: 0.558|| Elapsed Time: 140.43464179500006
+Dev set evaluation start...
+Dev accuracy result: 0.4|| Best result so far: 0.515||
+Time: 15:52:31.041873 || Epoch: 2 || N_Mini_Batch: 49 || Mini_Batch_Acc: 0.25|| LM loss: 7.575163841247559|| Total Loss: 8.6688814163208
+Time: 15:52:58.858441 || Epoch: 2 || N_Mini_Batch: 99 || Mini_Batch_Acc: 1.0|| LM loss: 7.183913230895996|| Total Loss: 7.541471481323242
+Time: 15:53:28.051855 || Epoch: 2 || N_Mini_Batch: 149 || Mini_Batch_Acc: 0.5|| LM loss: 7.265901565551758|| Total Loss: 8.435174942016602
+Time: 15:53:55.863019 || Epoch: 2 || N_Mini_Batch: 199 || Mini_Batch_Acc: 1.0|| LM loss: 7.667611122131348|| Total Loss: 7.839410781860352
+Time: 15:54:22.900444 || Epoch: 2 || N_Mini_Batch: 249 || Mini_Batch_Acc: 0.25|| LM loss: 6.738526821136475|| Total Loss: 7.882539749145508
+**Training Epoch: 2|| Train accuracy result: 0.574|| Elapsed Time: 140.18303604299945
+Dev set evaluation start...
+Dev accuracy result: 0.43|| Best result so far: 0.515||
+Time: 15:55:15.506981 || Epoch: 3 || N_Mini_Batch: 49 || Mini_Batch_Acc: 0.75|| LM loss: 7.019144058227539|| Total Loss: 8.01414680480957
+Time: 15:55:43.302326 || Epoch: 3 || N_Mini_Batch: 99 || Mini_Batch_Acc: 1.0|| LM loss: 6.912327766418457|| Total Loss: 7.342932224273682
+Time: 15:56:12.594755 || Epoch: 3 || N_Mini_Batch: 149 || Mini_Batch_Acc: 0.75|| LM loss: 6.900249481201172|| Total Loss: 7.882017135620117
+Time: 15:56:40.512443 || Epoch: 3 || N_Mini_Batch: 199 || Mini_Batch_Acc: 0.75|| LM loss: 7.410295486450195|| Total Loss: 7.897358417510986
+Time: 15:57:07.714253 || Epoch: 3 || N_Mini_Batch: 249 || Mini_Batch_Acc: 0.5|| LM loss: 6.8943023681640625|| Total Loss: 8.186431884765625
+**Training Epoch: 3|| Train accuracy result: 0.567|| Elapsed Time: 140.56214843299858
+Dev set evaluation start...
+***Saving Best Model*****
+Dev accuracy result: 0.52|| Best result so far: 0.52||
+Time: 15:58:01.849523 || Epoch: 4 || N_Mini_Batch: 49 || Mini_Batch_Acc: 0.75|| LM loss: 6.864706993103027|| Total Loss: 7.652428150177002
+Time: 15:58:29.792362 || Epoch: 4 || N_Mini_Batch: 99 || Mini_Batch_Acc: 1.0|| LM loss: 6.794706344604492|| Total Loss: 7.214313507080078
+Time: 15:58:59.093194 || Epoch: 4 || N_Mini_Batch: 149 || Mini_Batch_Acc: 0.5|| LM loss: 7.050650596618652|| Total Loss: 7.943565368652344
+Time: 15:59:27.000784 || Epoch: 4 || N_Mini_Batch: 199 || Mini_Batch_Acc: 1.0|| LM loss: 7.315385818481445|| Total Loss: 7.705493450164795

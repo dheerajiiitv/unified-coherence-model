@@ -56,20 +56,32 @@ Each of this filename contains pos and neg doc (2d list).  [pos, neg] -> [sent1,
 
 
 class BatchGeneratorGlobal():
-    def __init__(self, args, test=False):
+    def __init__(self, args, test=False, enron=False):
         """
         - path: file directory path
         - filelist_path: list of files in path directory
         """
         self.file_type = args.file_type
         self.test = test
+        self.enron = enron
+
+
 
         if self.test == True:
-            self.path = args.test_path
-            self.label = args.test_label
-            self.filelist_path = args.file_list_test
-            self.batch_size = args.batch_size_test
-            self.shuffle = False
+                if self.enron == True:
+                        self.path = args.test_path_enron
+                        self.label = args.test_label_enron
+                        self.filelist_path = args.file_list_test_enron
+                        self.batch_size = args.batch_size_test
+                        self.shuffle = False
+                else:
+                        self.path = args.test_path_clinton
+                        self.label = args.test_label_clinton
+                        self.filelist_path = args.file_list_test_clinton
+                        self.batch_size = args.batch_size_test
+                        self.shuffle = False
+
+
         else:
             self.path = args.train_path
             self.label = args.train_label
@@ -92,7 +104,7 @@ class BatchGeneratorGlobal():
         #for i in range(20):
         for i, fname in enumerate(items):
             if os.path.exists(os.path.join(self.path, fname)):
-                print(fname)
+                #print(fname)
                 loadpath = os.path.join(self.path, fname)
                 batch_file = load_file(loadpath, self.file_type)
                 # if pos and neg are same file i.e. perm is same, skip it
@@ -122,9 +134,10 @@ def create_batch_generators(args):
     if args.dataset == 'data-global':
         print("Reading Global Discrimination Dataset")
         batch_generator_train = BatchGeneratorGlobal(args)
-        batch_generator_test = BatchGeneratorGlobal(args, test=True)
+        batch_generator_test_clinton = BatchGeneratorGlobal(args, test=True)
+        batch_generator_test_enron = BatchGeneratorGlobal(args, test=True, enron=True)
     else:
         print("Reading Local Discrimination Dataset")
         batch_generator_train = BatchGeneratorLocal(args)
         batch_generator_test = BatchGeneratorLocal(args, test=True)
-    return batch_generator_train, batch_generator_test
+    return batch_generator_train, batch_generator_test_clinton, batch_generator_test_enron

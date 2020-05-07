@@ -1,0 +1,61 @@
+**ELMo word Embeddings!
+---------------------------------------------------------
+---------------------------------------------------------
+||Experiment Date:2020-5-14||
+Arguments List: 
+
+- experiment_path: model/
+- save_model: True
+- n_window: 3
+- train_path: processed_dataset/Dataset_GCDC/window_1/train/
+- train_label: processed_dataset/Dataset_GCDC/window_1/labels.train
+- test_label: processed_dataset/Dataset_GCDC/window_1/labels.test
+- test_path: processed_dataset/Dataset_GCDC/window_1/test/
+- file_list_train: processed_dataset/Dataset_GCDC/window_1/enron.train
+- file_list_test: processed_dataset/Dataset_GCDC/window_1/enron.test
+- pre_embedding_path: processed_dataset/pretrained_embedding/GoogleNews-vectors-negative300-SLIM.bin
+- vocab_path: processed_dataset/Dataset_GCDC/vocab/Vocab
+- padding_symbol: <pad>
+- Epoch: 25
+- learning_rate_step: 2
+- learning_rate_decay: 0.1
+- weight_decay: 1e-05
+- learning_rate: 0.0001
+- ranking_loss_margin: 5
+- device: cuda
+- batch_size_train: 4
+- batch_size_test: 4
+- shuffle: True
+- file_type: json
+- window_size: 3
+- n_vocabs: None
+- embed_dim: 256
+- hidden_dim: 256
+- num_layers: 1
+- dropout: 0
+- bidirectional: True
+- batch_first: True
+- num_head: 16
+- kernel_size: 5
+- conv_dropout: 0.0
+- kernel_padding: 3
+- kernel_softmax: True
+- GoogleEmbedding: False
+- RandomEmbedding: False
+- ELMo: True
+- ELMo_Size: small
+- bilinear_dim: 32
+- lm_loss_weight: 1.0
+- dataset: data-global
+- eval_task: std
+- global_model: True
+- experiment_folder: model/2020_5_14_16_34/
+---------------------------------------------------------
+---------------------------------------------------------
+
+Reading Global Discrimination Dataset
+Time: 16:35:12.071809 || Epoch: 0 || N_Mini_Batch: 49 || Mini_Batch_Acc: 0.75|| LM loss: 19.208139419555664|| Total Loss: 20.29224395751953
+Time: 16:35:40.807798 || Epoch: 0 || N_Mini_Batch: 99 || Mini_Batch_Acc: 0.75|| LM loss: 17.771364212036133|| Total Loss: 18.54431915283203
+Time: 16:36:11.041465 || Epoch: 0 || N_Mini_Batch: 149 || Mini_Batch_Acc: 0.25|| LM loss: 15.643138885498047|| Total Loss: 16.71931266784668
+Time: 16:36:39.841049 || Epoch: 0 || N_Mini_Batch: 199 || Mini_Batch_Acc: 0.75|| LM loss: 13.678340911865234|| Total Loss: 14.130613327026367
+Time: 16:37:07.903634 || Epoch: 0 || N_Mini_Batch: 249 || Mini_Batch_Acc: 0.25|| LM loss: 10.042692184448242|| Total Loss: 13.599237442016602

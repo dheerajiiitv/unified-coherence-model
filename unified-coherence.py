@@ -29,7 +29,7 @@ torch.manual_seed(6)
 args.ELMo_Size = "small"
 args.experiment_path = "model/"
 args.vocab_path = "processed_dataset/Dataset_GCDC/vocab/Vocab"
-args.device = "cpu"
+args.device = "cuda"
 args.save_model = True
 now = datetime.datetime.now()
 args.experiment_folder = args.experiment_path + \
@@ -46,7 +46,7 @@ args.word2idx = {tok: i for i, tok in enumerate(args.vocabs)}
 args.idx2word = {i: tok for i, tok in enumerate(args.vocabs)}
 args.padding_idx = args.word2idx[args.padding_symbol]
 
-batch_gen_train, batch_gen_test = data_load.create_batch_generators(args)
+batch_gen_train, batch_gen_test_clinton, batch_gen_test_enron = data_load.create_batch_generators(args)
 batcher = lm_model.TokenBatcher(args)
 # Sentence encoder
 sentence_encoder = model.SentenceEmbeddingModel(args).to(args.device)
@@ -209,12 +209,11 @@ def calculate_scores(batch, labels, test=False):
 
     #label = (batch_size, categories (3))
     labels = torch.tensor(labels) - 1
-    loss = criterion_entropy(classification, labels)
-    prediction = torch.argmax(classification, dim=1)
-
-
+    loss = criterion_entropy(classification, labels.to(args.device))
+    prediction = torch.argmax(classification, dim=1).to(args.device)
+    labels = labels.to(args.device)
     score_comparison = prediction == labels
-
+    score_comparison = score_comparison.to(args.device)
     score_comparison = score_comparison*1
 
     if test == False:
@@ -226,17 +225,17 @@ def calculate_scores(batch, labels, test=False):
 
 
 Best_Result = 0
-for epoch in range(2):
+for epoch in range(25):
     start_train = time.perf_counter()  # Measure one epoch training time
     scheduler.step()
     scheduler_lm.step()
     local_global_model.train()
     lm_loss_model.train()
 
-    print("Summary Local Global Model")
-    print(local_global_model)
-    print("Summary Language Model")
-    print(lm_loss_model )
+    #print("Summary Local Global Model")
+    #print(local_global_model)
+    #print("Summary Language Model")
+    #print(lm_loss_model )
 
 
     n_data_train = 0  # n_data_train is the number of accumulated train documents
@@ -277,15 +276,17 @@ for epoch in range(2):
         lm_loss_model.eval()
         n_data_test = 0  # n_data_test is the number of accumulated test documents
         n_TP_test = 0
-        for n_mini_batch, (batch, batch_doc_len, data_name, labels) in enumerate(batch_gen_test):
+        for n_mini_batch, (batch, batch_doc_len, data_name, labels) in enumerate(batch_gen_test_clinton):
             score_comparison = calculate_scores(batch,labels, test=True)
+            score_comparison = score_comparison.tolist()
             n_data_test += len(score_comparison)
             # How many documents in a mini-batch are correctly classified
             n_correct_test = sum(score_comparison)
             n_TP_test += n_correct_test
 
-        acc_epoch = n_TP_test/n_data_test  # Accuracy at a certain Epoch
-        if Best_Result < acc_epoch:
+        acc_epoch_clinton = n_TP_test/n_data_test  # Accuracy at a certain Epoch
+        '''
+	if Best_Result < acc_epoch:
             Best_Result = acc_epoch
             if args.save_model:
                 print("***Saving Best Model*****")
@@ -293,5 +294,18 @@ for epoch in range(2):
                 model_save_path = os.path.join(
                     args.experiment_path, model_name)
                 torch.save(local_global_model.state_dict(), model_save_path)
+	'''
+        n_data_test = 0  # n_data_test is the number of accumulated test documents
+        n_TP_test = 0
+        for n_mini_batch, (batch, batch_doc_len, data_name, labels) in enumerate(batch_gen_test_enron):
+            score_comparison = calculate_scores(batch,labels, test=True)
+            score_comparison = score_comparison.tolist()
+            n_data_test += len(score_comparison)
+            # How many documents in a mini-batch are correctly classified
+            n_correct_test = sum(score_comparison)
+            n_TP_test += n_correct_test
+
+        acc_epoch_enron = n_TP_test/n_data_test  # Accuracy at a certain Epoch
+
         print(
-            f"Dev accuracy result: {acc_epoch}|| Best result so far: {Best_Result}||")
+            f"Dev accuracy result Clinton: {acc_epoch_clinton}|| Dev accuracy result Enron: {acc_epoch_enron}||")
