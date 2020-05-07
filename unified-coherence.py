@@ -49,15 +49,14 @@ args.padding_idx = args.word2idx[args.padding_symbol]
 batch_gen_train, batch_gen_test = data_load.create_batch_generators(args)
 batcher = lm_model.TokenBatcher(args)
 # Sentence encoder
-sentence_encoder = model.SentenceEmbeddingModel(args).to(args.device)
+#sentence_encoder = model.SentenceEmbeddingModel(args).to(args.device)
 # Convolution layer for extracting global coherence patterns
 global_feature_extractor = model.LightweightConvolution(args).to(args.device)
 # Bilinear layer for modeling inter-sentence relation
 bilinear_layer = model.BiAffine(args).to(args.device)
 # Linear layer
 coherence_scorer = model.LocalCoherenceScore(args).to(args.device)
-local_global_model = nn.Sequential(sentence_encoder,
-                                   bilinear_layer,
+local_global_model = nn.Sequential(bilinear_layer,
                                    global_feature_extractor,
                                    coherence_scorer)
 optimizer = torch.optim.Adam(
@@ -129,14 +128,14 @@ def calculate_scores(batch, labels, test=False):
     output -> 3D Tensor.  [batch_size X doc_max_len, max_sentence_len, 2*args.hidden_dim] 
     hidden -> 3D Tensor.  [batch_size, doc_max_len, 2*args.hidden_dim] 
     '''
-    output, hidden = sentence_encoder(
-        docu_batch_idx, modified_batch_sentences_len)
+    hidden = model.get_USE(pos_batch, args)
 
     for doc_type in ['pos']:
         if doc_type == 'pos':  # for pos doc
             hidden_out = hidden
             if test == False:  # language model loss calculation only during training
-                lm_loss = calculate_lm_loss(pos_batch, output)
+                #lm_loss = calculate_lm_loss(pos_batch, output)
+                 lm_loss = 0
         else:
             if test == True and args.eval_task == 'inv':
                 neg_doc_order = utils.order_creator_inverse(

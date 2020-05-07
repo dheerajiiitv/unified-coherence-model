@@ -1,11 +1,12 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
+import tensorflow_hub as hub
 import gensim
 import numpy as np
 import copy
-
+import tensorflow as tf
+embed = hub.load("https://tfhub.dev/google/universal-sentence-encoder/4")
 from fairseq.modules import LightweightConv1dTBC
 
 from src import utils
@@ -265,3 +266,46 @@ class AdaptivePairwiseLoss(nn.Module):
             margin_tensor+subtract, torch.zeros(pos.size()).to(self.device).requires_grad_(False))
         loss = torch.mean(max_loss)
         return loss
+
+
+
+
+def get_USE(pos_batch, args):
+
+    # @input: doc -> sentences -> words
+    # @output: doc -> sentences -> embeddings
+
+    # Make all Sentence of equal length.
+    max_doc_length = max([len(doc) for doc in pos_batch])
+    padded_docs = []
+    for doc in pos_batch:
+     doc.append([args.padding_symbol] * (max_doc_length - len(doc)))
+     padded_docs.append(doc)
+
+   
+    # Get sentences from word
+    #print(padded_docs[0])
+    padded_docs = [' '.join(sent) for doc in padded_docs for sent in doc]
+
+    # Input sentence becomes  sentences of size (number_of_batch_size * max_doc_length)
+
+    # Embed it with USE.
+    return padded_docs
+    '''
+    print(embeddings.shape)
+    hidden = torch.tensor(tf.convert_to_tensor(embeddings))
+    print(hidden.shape)
+
+    # Output : (number_of_sentence * 512)
+
+    hidden = hidden.view(args.batch_size, max_doc_length, -1)
+
+    # Change to tensor
+
+    # Rehape to (batch_size * sent * 512)
+
+    # Return
+
+    return hidden
+    '''
+
