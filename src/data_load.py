@@ -63,13 +63,16 @@ class BatchGeneratorGlobal():
         """
         self.file_type = args.file_type
         self.test = test
+
         if self.test == True:
             self.path = args.test_path
+            self.label = args.test_label
             self.filelist_path = args.file_list_test
             self.batch_size = args.batch_size_test
             self.shuffle = False
         else:
             self.path = args.train_path
+            self.label = args.train_label
             self.filelist_path = args.file_list_train
             self.batch_size = args.batch_size_train
             self.shuffle = args.shuffle
@@ -77,32 +80,42 @@ class BatchGeneratorGlobal():
     def __iter__(self):
         with open(self.filelist_path, 'r') as f:
             items = [line.strip() for line in f.readlines()]
-        if self.shuffle == True:
-            random.shuffle(items)
+
+        with open(self.label, 'r') as f:
+            labels =[int(line.strip()) for line in f.readlines()]
+        # if self.shuffle == True:
+        #     random.shuffle(items)
         batch = []
         batch_fname = []
         batch_length = []
-        for i in range(20):
-            for fname in items:
-                fname = fname + "_" + str(i+1)
-                if os.path.exists(os.path.join(self.path, fname)):
-                    print(fname)
-                    loadpath = os.path.join(self.path, fname)
-                    batch_file = load_file(loadpath, self.file_type)
-                    # if pos and neg are same file i.e. perm is same, skip it
-                    if batch_file[0] == batch_file[1]:
-                        continue
-                    for z in range(len(batch_file)):  # z=0 -> pos_doc; z=1 -> neg_doc
-                        batch_file[z] = [sentence.split()
-                                         for sentence in batch_file[z]]
-                    batch.append(batch_file)
-                    batch_length.append(len(batch_file[0]))
-                    batch_fname.append(fname)
-                    if len(batch) == self.batch_size:
-                        yield batch, batch_length, batch_fname
-                        batch = []  # make it batch empty for the next iteration
-                        batch_fname = []
-                        batch_length = []
+        label = []
+        #for i in range(20):
+        for i, fname in enumerate(items):
+            if os.path.exists(os.path.join(self.path, fname)):
+                print(fname)
+                loadpath = os.path.join(self.path, fname)
+                batch_file = load_file(loadpath, self.file_type)
+                # if pos and neg are same file i.e. perm is same, skip it
+                # if batch_file[0] == batch_file[1]:
+                #     continue
+                # for z in range(len(batch_file)):  # z=0 -> pos_doc; z=1 -> neg_doc
+                batch_file[0] = [(i+' <eos>').split() for i in ' '.join(batch_file[0]).split('<eos>')][:-1]
+                batch.append(batch_file)
+                batch_length.append(len(batch_file[0]))
+                batch_fname.append(fname)
+                label.append(labels[i])
+                if len(batch) == self.batch_size:
+                    yield batch, batch_length, batch_fname, label
+                    batch = []  # make it batch empty for the next iteration
+                    batch_fname = []
+                    batch_length = []
+                    label = []
+                # elif len(batch) < self.batch_size and i == len(items) - 1:
+                #     yield batch, batch_length, batch_fname, label
+                #     batch = []  # make it batch empty for the next iteration
+                #     batch_fname = []
+                #     batch_length = []
+                #     label = []
 
 
 def create_batch_generators(args):

@@ -28,7 +28,7 @@ torch.manual_seed(6)
 
 args.ELMo_Size = "small"
 args.experiment_path = "model/"
-args.vocab_path = "processed_dataset/Dataset/vocab/Vocab"
+args.vocab_path = "processed_dataset/Dataset_GCDC/vocab/Vocab"
 args.device = "cpu"
 args.save_model = True
 now = datetime.datetime.now()
@@ -74,7 +74,7 @@ scheduler_lm = torch.optim.lr_scheduler.StepLR(
     lm_optimizer, step_size=args.learning_rate_step, gamma=args.learning_rate_decay)
 
 criterion = model.AdaptivePairwiseLoss(args)
-
+criterion_entropy = nn.CrossEntropyLoss()
 
 def calculate_lm_loss(pos_batch, output):
     '''
@@ -108,7 +108,7 @@ def calculate_lm_loss(pos_batch, output):
     return lm_loss
 
 
-def calculate_scores(batch, test=False):
+def calculate_scores(batch, labels, test=False):
     '''
     batch -> a 4D list containing minibatch of docs.  [doc0, doc1, ..] -> [pdoc0, ndoc0] -> [sent1, sent2, ..] -> [word1, word2, ..]
     pos_batch/neg_batch -> 3d list.  [pdoc0, pdoc1, ..] -> [sent1, sent2, ..] -> [word1, word2, ..]
@@ -132,7 +132,7 @@ def calculate_scores(batch, test=False):
     output, hidden = sentence_encoder(
         docu_batch_idx, modified_batch_sentences_len)
 
-    for doc_type in ['pos', 'neg']:
+    for doc_type in ['pos']:
         if doc_type == 'pos':  # for pos doc
             hidden_out = hidden
             if test == False:  # language model loss calculation only during training
@@ -187,39 +187,42 @@ def calculate_scores(batch, test=False):
         # 3D Tensor containing concatenated global+local features.  [batch -> sentence -> 2*args.hidden_dim+2*bilinear_dim]
         coherence_feature = torch.cat(
             (cat_bioutput_feat, conv_extended), dim=2)
-        # linear layer returns 3D tensor containing scores.   [batch -> sentence -> 1]
+        # linear layer returns 3D tensor containing scores.   [batch -> sentence -> 3]
         scores = coherence_scorer(coherence_feature)
         # mask value for finding valid scores. valid index contains 1, others 0
         score_mask = utils.score_masked(scores, batch_docs_len, args.device)
-        # Only keep the valid scores. 3D tensor containing scores.   [batch -> sentence -> 1]
+    #     # Only keep the valid scores. 3D tensor containing scores.   [batch -> sentence -> 1]
         masked_score = scores*score_mask
 
-        if doc_type == 'pos':
-            pos_score = masked_score
-            pos_mask = mask_val
-        else:
-            neg_score = masked_score
-            neg_mask = mask_val
+    #     if doc_type == 'pos':
+    #         pos_score = masked_score
+    #         pos_mask = mask_val
+    #     else:
+    #         neg_score = masked_score
+    #         neg_mask = mask_val
+    #
+    # # Document level socre
+    # # 1D numpy array containing the sum scores of the document.   [batch]
 
-    # Document level socre
-    # 1D numpy array containing the sum scores of the document.   [batch]
-    pos_doc_score = np.asarray([score.sum().data.cpu().numpy()
-                                for score in pos_score])
-    neg_doc_score = np.asarray([score.sum().data.cpu().numpy()
-                                for score in neg_score])
-    score_comparison = pos_doc_score > neg_doc_score
-    score_comparison = score_comparison*1  # True->1, False->0
+        # 3D tensor containing scores (batch_size  , 3)
+    classification = torch.sum(masked_score, dim=1)
+
+    #label = (batch_size, categories (3))
+    labels = torch.tensor(labels) - 1
+    loss = criterion_entropy(classification, labels)
+    prediction = torch.argmax(classification, dim=1)
+
+
+    score_comparison = prediction == labels
+
+    score_comparison = score_comparison*1
 
     if test == False:
-        # In loss calculation, we don't want to penalize local coherent segments(3sentenes in our case).
-        # mask contains local coherent seg info
-        sub = pos_mask-neg_mask
-        mask = sub != 0
-        mask = mask.type(torch.FloatTensor).to(args.device)
-        loss = criterion(pos_score, neg_score, mask)
         return loss, lm_loss, score_comparison
     else:
         return score_comparison
+
+
 
 
 Best_Result = 0
@@ -230,8 +233,6 @@ for epoch in range(2):
     local_global_model.train()
     lm_loss_model.train()
 
-    from torchsummary import summary
-
     print("Summary Local Global Model")
     print(local_global_model)
     print("Summary Language Model")
@@ -240,7 +241,7 @@ for epoch in range(2):
 
     n_data_train = 0  # n_data_train is the number of accumulated train documents
     n_TP_train = 0
-    for n_mini_batch, (batch, batch_doc_len, data_name) in enumerate(batch_gen_train):
+    for n_mini_batch, (batch, batch_doc_len, data_name, labels) in enumerate(batch_gen_train):
         """
         Batch the document 
         batch -> a 4D list containing minibatch of docs [doc0, doc1, ..] -> [pos, neg] -> [sent1, sent2, ..] -> [word1, word2, ..]
@@ -248,7 +249,7 @@ for epoch in range(2):
         batch_doc_len -> length (#sentences) of each docs in the batch
         data_name -> name of the pos doc files in the batch
         """
-        loss, lm_loss, score_comparison = calculate_scores(batch, test=False)
+        loss, lm_loss, score_comparison = calculate_scores(batch, labels, test=False)
         total_loss = loss + lm_loss
 
         optimizer.zero_grad()
@@ -257,12 +258,12 @@ for epoch in range(2):
         optimizer.step()
         lm_optimizer.step()
         torch.cuda.empty_cache()
-
+        score_comparison = score_comparison.tolist()
         n_data_train += len(score_comparison)
         # How many documents in a mini-batch are correctly classified
-        n_correct_train = score_comparison.sum()
+        n_correct_train = sum(score_comparison)
         n_TP_train += n_correct_train
-        if (n_mini_batch+1) % 500 == 0:
+        if (n_mini_batch+1) % 50 == 0:
             print(f"Time: {datetime.datetime.now().time()} || Epoch: {epoch} || N_Mini_Batch: {n_mini_batch} || Mini_Batch_Acc: {sum(score_comparison)/args.batch_size_train}|| LM loss: {lm_loss}|| Total Loss: {total_loss}")
 
     acc_epoch = n_TP_train / n_data_train  # Accuracy at a certain Epoch
@@ -276,11 +277,11 @@ for epoch in range(2):
         lm_loss_model.eval()
         n_data_test = 0  # n_data_test is the number of accumulated test documents
         n_TP_test = 0
-        for n_mini_batch, (batch, batch_doc_len, data_name) in enumerate(batch_gen_test):
-            score_comparison = calculate_scores(batch, test=True)
+        for n_mini_batch, (batch, batch_doc_len, data_name, labels) in enumerate(batch_gen_test):
+            score_comparison = calculate_scores(batch,labels, test=True)
             n_data_test += len(score_comparison)
             # How many documents in a mini-batch are correctly classified
-            n_correct_test = score_comparison.sum()
+            n_correct_test = sum(score_comparison)
             n_TP_test += n_correct_test
 
         acc_epoch = n_TP_test/n_data_test  # Accuracy at a certain Epoch

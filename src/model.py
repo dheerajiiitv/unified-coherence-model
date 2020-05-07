@@ -233,11 +233,19 @@ class LocalCoherenceScore(nn.Module):
             self.input_dim = args.bilinear_dim*2 + args.hidden_dim*2
         else:
             self.input_dim = args.bilinear_dim*2
-        self.linear_score = nn.Linear(self.input_dim, 1)
+        self.linear_score = nn.Linear(self.input_dim, 3)
 
     def forward(self, bi_output):
         output = self.linear_score(bi_output)
         return output
+
+# class DenseClassifier(nn.Module):
+#     def __init__(self, max_sentence_length, args):
+#
+#         super(DenseClassifier, self).__init__()
+#
+#         self.classification = nn.Linear(max_sentence_length, 3)
+
 
 
 class AdaptivePairwiseLoss(nn.Module):
