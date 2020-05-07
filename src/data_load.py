@@ -92,7 +92,7 @@ class BatchGeneratorGlobal():
         #for i in range(20):
         for i, fname in enumerate(items):
             if os.path.exists(os.path.join(self.path, fname)):
-                print(fname)
+                #print(fname)
                 loadpath = os.path.join(self.path, fname)
                 batch_file = load_file(loadpath, self.file_type)
                 # if pos and neg are same file i.e. perm is same, skip it

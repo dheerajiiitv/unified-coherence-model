@@ -17,7 +17,7 @@ args = parser.parse_args()
 if args.ELMo:
     print("**ELMo word Embeddings!")
     parser.set_defaults(learning_rate_step=2,
-                        embed_dim=256, GoogleEmbedding=False)
+                        embed_dim=1024, GoogleEmbedding=False)
 else:
     print("**word2vec Embeddings!")
 args = parser.parse_args()
@@ -26,10 +26,10 @@ args = parser.parse_args()
 random.seed(0)
 torch.manual_seed(6)
 
-args.ELMo_Size = "small"
+args.ELMo_Size = "large"
 args.experiment_path = "model/"
 args.vocab_path = "processed_dataset/Dataset_GCDC/vocab/Vocab"
-args.device = "cpu"
+args.device = "cuda"
 args.save_model = True
 now = datetime.datetime.now()
 args.experiment_folder = args.experiment_path + \
@@ -209,12 +209,11 @@ def calculate_scores(batch, labels, test=False):
 
     #label = (batch_size, categories (3))
     labels = torch.tensor(labels) - 1
-    loss = criterion_entropy(classification, labels)
-    prediction = torch.argmax(classification, dim=1)
-
-
+    loss = criterion_entropy(classification, labels.to(args.device))
+    prediction = torch.argmax(classification, dim=1).to(args.device)
+    labels = labels.to(args.device)
     score_comparison = prediction == labels
-
+    score_comparison = score_comparison.to(args.device)
     score_comparison = score_comparison*1
 
     if test == False:
@@ -226,7 +225,7 @@ def calculate_scores(batch, labels, test=False):
 
 
 Best_Result = 0
-for epoch in range(2):
+for epoch in range(25):
     start_train = time.perf_counter()  # Measure one epoch training time
     scheduler.step()
     scheduler_lm.step()
@@ -279,6 +278,7 @@ for epoch in range(2):
         n_TP_test = 0
         for n_mini_batch, (batch, batch_doc_len, data_name, labels) in enumerate(batch_gen_test):
             score_comparison = calculate_scores(batch,labels, test=True)
+            score_comparison = score_comparison.tolist()
             n_data_test += len(score_comparison)
             # How many documents in a mini-batch are correctly classified
             n_correct_test = sum(score_comparison)
