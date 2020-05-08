@@ -114,6 +114,14 @@ class SentenceEmbeddingModel(nn.Module):
                            self.hidden_dim).to(self.device)
         return (hidden, cell)
 
+class DenseLayer(nn.Module):
+    def __init__(self, args):
+        super(DenseLayer, self).__init__()
+
+        self.dense = nn.Linear(in_features=2* args.hidden_dim, out_features= 2* args.hidden_dim)
+
+    def forward(self, inp):
+        return  self.dense(inp)
 
 class PretrainedEmbeddings():
     def __init__(self, args):
@@ -279,33 +287,33 @@ def get_USE(pos_batch, args):
     max_doc_length = max([len(doc) for doc in pos_batch])
     padded_docs = []
     for doc in pos_batch:
-     doc.append([args.padding_symbol] * (max_doc_length - len(doc)))
+     doc.extend([args.padding_symbol] * (max_doc_length - len(doc)))
      padded_docs.append(doc)
 
+ 
    
     # Get sentences from word
     #print(padded_docs[0])
+    #print(len(padded_docs[0]), len(padded_docs[1]))
     padded_docs = [' '.join(sent) for doc in padded_docs for sent in doc]
 
     # Input sentence becomes  sentences of size (number_of_batch_size * max_doc_length)
 
     # Embed it with USE.
-    return padded_docs
-    '''
-    print(embeddings.shape)
-    hidden = torch.tensor(tf.convert_to_tensor(embeddings))
-    print(hidden.shape)
+    #print(embeddings.shape)
+    hidden = torch.tensor(np.array(embed(padded_docs)))
+    #print(hidden.shape)
 
     # Output : (number_of_sentence * 512)
 
-    hidden = hidden.view(args.batch_size, max_doc_length, -1)
-
+    hidden = hidden.view(args.batch_size_train, max_doc_length, -1)
+    #print(hidden.shape)
     # Change to tensor
 
     # Rehape to (batch_size * sent * 512)
 
     # Return
 
-    return hidden
-    '''
+    return hidden.to(args.device)
+
 

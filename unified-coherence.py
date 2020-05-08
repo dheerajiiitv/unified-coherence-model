@@ -48,6 +48,7 @@ args.padding_idx = args.word2idx[args.padding_symbol]
 
 batch_gen_train, batch_gen_test = data_load.create_batch_generators(args)
 batcher = lm_model.TokenBatcher(args)
+dense_layer = model.DenseLayer(args).to(args.device)
 # Sentence encoder
 #sentence_encoder = model.SentenceEmbeddingModel(args).to(args.device)
 # Convolution layer for extracting global coherence patterns
@@ -56,7 +57,8 @@ global_feature_extractor = model.LightweightConvolution(args).to(args.device)
 bilinear_layer = model.BiAffine(args).to(args.device)
 # Linear layer
 coherence_scorer = model.LocalCoherenceScore(args).to(args.device)
-local_global_model = nn.Sequential(bilinear_layer,
+local_global_model = nn.Sequential(
+dense_layer, bilinear_layer,
                                    global_feature_extractor,
                                    coherence_scorer)
 optimizer = torch.optim.Adam(
@@ -149,7 +151,8 @@ def calculate_scores(batch, labels, test=False):
                 hidden_out[i, :, :] = torch.index_select(hidden[i, :, :], dim=0, index=neg_doc_order[i])
 
         ### Global Feature ###
-        # make the time dim to first, batch to second - for lightweight conv.  [doc_max_len -> batch_size -> 2*args.hidden_dim]
+        # make the time dim to first, batch to second - for lightweight conv.  [doc_max_len -> batch_size -> 2*args.hidden_dim
+        hidden_out = dense_layer(hidden_out)
         hidden_out = hidden_out.permute(1, 0, 2).contiguous()
         # 3D Tensor containing global features from lightweight convolution.  [batch -> 1 -> 2*args.hidden_dim]
         # batch is made first dim in the function
@@ -231,10 +234,10 @@ for epoch in range(25):
     local_global_model.train()
     lm_loss_model.train()
 
-    print("Summary Local Global Model")
-    print(local_global_model)
-    print("Summary Language Model")
-    print(lm_loss_model )
+    #print("Summary Local Global Model")
+    #print(local_global_model)
+    #print("Summary Language Model")
+    #print(lm_loss_model )
 
 
     n_data_train = 0  # n_data_train is the number of accumulated train documents
