@@ -57,10 +57,11 @@ global_feature_extractor = model.LightweightConvolution(args).to(args.device)
 bilinear_layer = model.BiAffine(args).to(args.device)
 # Linear layer
 coherence_scorer = model.LocalCoherenceScore(args).to(args.device)
+dense_out_layer = model.DenseOutputLayer(args).to(args.device)
 local_global_model = nn.Sequential(
 dense_layer, bilinear_layer,
                                    global_feature_extractor,
-                                   coherence_scorer)
+                                   coherence_scorer,dense_out_layer )
 optimizer = torch.optim.Adam(
     local_global_model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
 scheduler = torch.optim.lr_scheduler.StepLR(
@@ -189,7 +190,7 @@ def calculate_scores(batch, labels, test=False):
         # 3D Tensor containing concatenated global+local features.  [batch -> sentence -> 2*args.hidden_dim+2*bilinear_dim]
         coherence_feature = torch.cat(
             (cat_bioutput_feat, conv_extended), dim=2)
-        # linear layer returns 3D tensor containing scores.   [batch -> sentence -> 3]
+        # linear layer returns 3D tensor containing scores.   [batch -> sentence -> 1]
         scores = coherence_scorer(coherence_feature)
         # mask value for finding valid scores. valid index contains 1, others 0
         score_mask = utils.score_masked(scores, batch_docs_len, args.device)
@@ -207,7 +208,10 @@ def calculate_scores(batch, labels, test=False):
     # # 1D numpy array containing the sum scores of the document.   [batch]
 
         # 3D tensor containing scores (batch_size  , 3)
-    classification = torch.sum(masked_score, dim=1)
+        
+        classification = dense_out_layer(masked_score.view(-1, args.doc_max_length))
+        
+    #classification = torch.sum(masked_score, dim=1)
 
     #label = (batch_size, categories (3))
     labels = torch.tensor(labels) - 1

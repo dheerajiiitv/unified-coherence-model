@@ -123,6 +123,15 @@ class DenseLayer(nn.Module):
     def forward(self, inp):
         return  self.dense(inp)
 
+class DenseOutputLayer(nn.Module):
+    def __init__(self, args):
+        super(DenseOutputLayer, self).__init__()
+
+        self.dense = nn.Linear(in_features=args.doc_max_length, out_features= 3)
+
+    def forward(self, inp):
+        return  self.dense(inp)   
+ 
 class PretrainedEmbeddings():
     def __init__(self, args):
         self.pre_embedding_path = args.pre_embedding_path
@@ -242,7 +251,7 @@ class LocalCoherenceScore(nn.Module):
             self.input_dim = args.bilinear_dim*2 + args.hidden_dim*2
         else:
             self.input_dim = args.bilinear_dim*2
-        self.linear_score = nn.Linear(self.input_dim, 3)
+        self.linear_score = nn.Linear(self.input_dim, 1)
 
     def forward(self, bi_output):
         output = self.linear_score(bi_output)
@@ -284,11 +293,23 @@ def get_USE(pos_batch, args):
     # @output: doc -> sentences -> embeddings
 
     # Make all Sentence of equal length.
-    max_doc_length = max([len(doc) for doc in pos_batch])
+    # Truncate those which are larger and truncate smaller
+    
+    #max_doc_length = max([len(doc) for doc in pos_batch])
+    
+    max_doc_length = args.doc_max_length
+    
     padded_docs = []
     for doc in pos_batch:
-     doc.extend([args.padding_symbol] * (max_doc_length - len(doc)))
-     padded_docs.append(doc)
+        if max_doc_length > len(doc):
+            #Append
+            doc.extend([args.padding_symbol] * (max_doc_length - len(doc)))
+            
+        else:
+            #Truncate
+            doc = doc[:max_doc_length]
+        
+        padded_docs.append(doc)
 
  
    

@@ -11,6 +11,9 @@ from allennlp.modules.elmo import batch_to_ids
 
 def argument_parser():
     parser = argparse.ArgumentParser()
+    parser.add_argument('--doc_max_length', type=str,
+                        default=7, help='Maximum number of sentence in document')
+    
     parser.add_argument('--experiment_path', type=str,
                         default="./Experiments/ELMo/", help='Save path of best model')
     parser.add_argument('--save_model', type=bool, default=False,
