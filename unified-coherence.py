@@ -56,7 +56,7 @@ global_feature_extractor = model.LightweightConvolution(args).to(args.device)
 bilinear_layer = model.BiAffine(args).to(args.device)
 # Linear layer
 coherence_scorer = model.LocalCoherenceScore(args).to(args.device)
-local_global_model = nn.Sequential(sentence_encoder,
+local_global_model = nn.Sequential(
                                    bilinear_layer,
                                    global_feature_extractor,
                                    coherence_scorer)
@@ -129,14 +129,14 @@ def calculate_scores(batch, labels, test=False):
     output -> 3D Tensor.  [batch_size X doc_max_len, max_sentence_len, 2*args.hidden_dim] 
     hidden -> 3D Tensor.  [batch_size, doc_max_len, 2*args.hidden_dim] 
     '''
-    output, hidden = sentence_encoder(
-        docu_batch_idx, modified_batch_sentences_len)
-
+    #output, hidden = sentence_encoder(docu_batch_idx, modified_batch_sentences_len)
+    hidden = model.get_USE(pos_batch, args)
     for doc_type in ['pos']:
         if doc_type == 'pos':  # for pos doc
             hidden_out = hidden
             if test == False:  # language model loss calculation only during training
-                lm_loss = calculate_lm_loss(pos_batch, output)
+                #lm_loss = calculate_lm_loss(pos_batch, output)
+                lm_loss = 0
         else:
             if test == True and args.eval_task == 'inv':
                 neg_doc_order = utils.order_creator_inverse(
