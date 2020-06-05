@@ -1,0 +1,67 @@
+    1  source activate pytotch_p36
+    2  source activate pytooch_p36
+    3  source activate pytroch_p36
+    4  source activate pytorch_p36
+    5  pip install -upgrade pip
+    6  ls
+    7  git clone https://github.com/dheerajiiitv/unified-coherence-model
+    8  pip install torchtext
+    9  pip install tensorflow-gpu==2.2.0
+   10  pip install allennlp
+   11  ls
+   12  cd unified-coherence-model/
+   13  ls
+   14  git checkout meeting_changes 
+   15  git log
+   16  python unified-coherence.py 
+   17  pip install gensum
+   18  pip install gensim
+   19  python unified-coherence.py 
+   20  pip install fairseq
+   21  python unified-coherence.py 
+   22  pip install tensorflow_hub
+   23  python unified-coherence.py 
+   24  python unified-coherence.py --ELMo
+   25  python unified-coherence.py --ELMO
+   26  python unified-coherence.py --ELMo ELMO
+   27  ls
+   28  c dmo
+   29  cd model/
+   30  ls
+   31  cd 2020_6_4_10_3
+   32  ls
+   33  ls -l
+   34  cd 2020_6_4_10_33
+   35  ls
+   36  cd ..
+   37  cd 2020_6_4_10_35
+   38  LS
+   39  ls
+   40  cd ..
+   41  vi unified-coherence.py 
+   42  rm -r model/
+   43  python unified-coherence.py --ELMo ELMO
+   44  cd model/
+   45  ls
+   46  ls -l
+   47  vi ../unified-coherence.py 
+   48  git add Epoch_5_MMdd_6_4 
+   49  git commit -m "model_USE_5"
+   50  git push
+   51  python
+   52  python un
+   53  cd ..
+   54  python unified-coherence.py 
+   55  python unified-coherence.py --ELMo ELMO
+   56  cd model/
+   57  ls
+   58  ls - l
+   59  ls -l
+   60  python
+   61  cd unified-coherence-model/
+   62  vi unified-coherence.py 
+   63  rm -r model/
+   64  ls
+   65  histrory
+   66  history
+   67  history > commands.txt
